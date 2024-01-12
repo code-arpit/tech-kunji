@@ -55,38 +55,41 @@ C6: Entering access to a container
 	$ docker exec <container_id/container_name> <command>
 		** Command to run in the container in not interactive way
 
+C7: Inspecting a container to view its configuration
+	$ docker inspect <container_id>
+
 
 II: VOLUME
 
-C7: Displaying List of volumes created
+C8: Displaying List of volumes created
 	$ docker volume ls -q
 		-q: displays only the name column
 
-C8: Creating a volume
+C9: Creating a volume
 	$ docker volume create <volume_name>
 		This will create an empty volume with given name
 
-C9: Attaching a volume
+C10: Attaching a volume
 	
-	C9a: (HOST VOLUMES) Attaching a local directory as volume(to see changes after reloading i.e. For developing dockerized project)
+	C10a: (HOST VOLUMES) Attaching a local directory as volume(to see changes after reloading i.e. For developing dockerized project)
 		$ docker run -v ./:/app -p 127.0.0.1:8000:8000 <image_tag>
 			* Stop the container before running this.
 			-v : attaching as local directory as volume (host_directory:container_directory)
 			-p : port mapping (host:container)
 	
-	C9b: (NAMED VOLUMES) Attaching it to the container
+	C10b: (NAMED VOLUMES) Attaching it to the container
 		$ docker run -v <volume_name>:<container_directory> -p <host_port>:<container_port> <image_tag>
 			* Stop the container before running this
 			-v : attaching as volume (volume_name:container_directory)
 			-p : port mapping (host_port:container_port)
 			** Image_tag should be same which is used while building the image
 
-	* If there is a need for multiple volumes use multiple -v tags while running the commands mentioned in (C9)
+	* If there is a need for multiple volumes use multiple -v tags while running the commands mentioned in (C10)
 
-C10: Removing/Deleting a volume
+C11: Removing/Deleting a volume
 	$ docker volume rm <volume_name>
 		* The volume will only be removes if not in use by the container
-		** you can get the volume name by following (C7)
+		** you can get the volume name by following (C8)
 
 	$ docker volume prune -af
 		-a : removes all the unused named volumes except the annonymus ones
@@ -95,4 +98,47 @@ C10: Removing/Deleting a volume
 
 III: COMPOSE
 
-C11: 
+C12: Building a compose network
+	$ docker compose build --no-cache
+		--no-cache : build the contains specified in the file without using cache if there
+	
+C13: Starting the compose network
+	$ docker compose up -d --build
+		-d : start the network in detached mode 
+		--build : start the network after building it
+		## we can also add container name mentioned in the compose file if we want to start a particular container
+
+	
+C14: Looking/Following the logs for the network 
+	$ docker compose logs -f --tail 100
+		-f : follow the log output
+		--tail 100 : shows a particular number of logs from each container in the network 
+			i.e in this case 100
+		** we can also add container name if we want to see logs of a specific container
+
+C15: Accessing the container running in the compose network
+	$ docker compose exec <container_name> <command>
+		** We can also access container via container tag using (C6)
+
+C16: Stopping the whole network
+	$ docker compose down
+		This command stops and remove containers, networks, images, volumes, and driver data associated with it.
+	
+C17: Restart the compose network
+	$ docker compose restart
+		** we can also add container name at the end if we want to restart a particular container not the whole network
+
+C18: Only used with postgres container for dumping and restore data into the db container
+	C18a: Using pg_dump
+		$ docker compose exec db pg_dump -U <username> -Fc <database_name> > db.sql
+
+		$ docker compose exec db pg_dump -U <username> <database_name> | zip > ~/db.sql.zip
+
+		$ docker compose exec db pg_dump -U <username> <database_name> | zip > ~/db.sql.gz
+
+	C18b: Restoring using pg_restore
+		$ docker compose exec -T db pg_restore -Fc -d <database_name> -U <username> < db.sql 
+
+		$  unzip -c db.sql.zip | docker-compose exec -T db psql -U <username> <database_name>
+		
+		$  gunzip -c db.sql.gz | docker-compose exec -T db psql -U <username> <database_name>
