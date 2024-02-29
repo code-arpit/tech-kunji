@@ -55,8 +55,11 @@ C6: Entering access to a container
 	$ docker exec <container_id/container_name> <command>
 		** Command to run in the container in not interactive way
 
-C7: Inspecting a container to view its configuration
+C7: Inspecting/Viewing a container to view its configuration
 	$ docker inspect <container_id>
+
+	$ docker logs -f --tail <n> <container_name/container_id>
+		--tail : follows the log file, <n> number of logs
 
 
 II: VOLUME
